@@ -1,0 +1,507 @@
+<html>
+  <head>
+    <title>starterVM</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+    <link rel="stylesheet" href="app.css">
+    <script data-main="app" src="lib/require.js"></script>
+  </head>
+  <body>
+    <a href="https://github.com/lujb"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/38ef81f8aca64bb9a64448d0d70f1308ef5341ab/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6461726b626c75655f3132313632312e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png"></a>
+    <div class="container">
+      <div class="page-header">
+        <h1>starterVM</h1>
+        <p class="lead">A simple register based virtual machine running on web. Based on <a href="http://www.icemanind.com/">icemanind's b32</a>, but more instructions, operations and interrupts are added to make it more powerful.</p>
+      </div>
+      <h2><a name="demo">Demo</a></h2>
+      <p id="emulator-state"/>
+      <div class="row">
+        <div class="col-md-5">
+          <canvas id="screen" tabindex="1"/>
+        </div>
+        <div class="col-md-2"></div>
+        <div class="col-md-5">
+          <div class="row">
+            Examples:
+            <label class="radio-inline">
+              <input type="radio" name="example">HIJKL
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="example">Binary
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="example">Random characters
+            </label>
+            <label class="radio-inline">
+              <input type="radio" name="example">Echo
+            </label>
+          </div>
+          <div class="row">
+            <textarea rows="10" cols="50" id="code" placeholder="choose one example or write your own."></textarea>
+          </div>
+          <div class="row">
+            <button type="button" class="btn btn-default" id="compileAndRun">Compile And Run</button>
+          </div>
+          <div class="row wordwrap" id="compilingStatus"> </div>
+        </div>
+      </div>
+
+      <hr/>
+
+      <h2><a name="registers">Registers</a></h2>
+      <div class="row">
+        <div class="col-md-7">
+          <div class="panel panel-default">
+            <table class="table table-striped table-bordered table-hover">
+              <tr>
+                <th>Name</th>
+                <th>Size</th>
+                <th>General</th>
+                <th>Description</th>
+              </tr>
+              <tr>
+                <td>A</td>
+                <td>8 bit</td>
+                <td>Yes</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>B</td>
+                <td>8 bit</td>
+                <td>Yes</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>D</td>
+                <td>16 bit</td>
+                <td>Yes</td>
+                <td>concatenation of A and B</td>
+              </tr>
+              <tr>
+                <td>X</td>
+                <td>16 bit</td>
+                <td>Yes</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>Y</td>
+                <td>16 bit</td>
+                <td>Yes</td>
+                <td></td>
+              </tr>
+              <tr>
+                <td>IP</td>
+                <td>16 bit</td>
+                <td>No</td>
+                <td>used for instruction pointer</td>
+              </tr>
+              <tr>
+                <td>FLAG</td>
+                <td>8 bit</td>
+                <td>No</td>
+                <td>store the flag of comparison and arithmetical operation</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <h2><a name="instructions">Instructions</a></h2>
+      <div class="row">
+        <div class="col-md-12">
+          <div class="panel panel-default">
+            <table class="table table-striped table-bordered table-hover">
+              <tr>
+                <th>OpCode(decimal)</th>
+                <th>Mnemonic</th>
+                <th>Operand</th>
+                <th>Scope</th>
+                <th>Example</th>
+                <th>Description</th>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>LDA</td>
+                <td>immediate</td>
+                <td>b32</td>
+                <td>LDA #100</td>
+                <td>load value into register A</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>LDX</td>
+                <td>immediate</td>
+                <td>b32</td>
+                <td>LDX #100</td>
+                <td>load value into register X</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>STA, X</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>store value in register A into memory location specified by register X</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>END</td>
+                <td>label</td>
+                <td>b32</td>
+                <td>END #Start</td>
+                <td>terminate the program</td>
+              </tr>
+              <tr>
+                <td>5</td>
+                <td>CMPA</td>
+                <td>immediate</td>
+                <td>b32</td>
+                <td>CMPA #100</td>
+                <td>compares value in register A, and sets register FLAG</td>
+              </tr>
+              <tr>
+                <td>6</td>
+                <td>CMPB</td>
+                <td>immediate</td>
+                <td>b32</td>
+                <td>CMPB #100</td>
+                <td>compares value in register B, and sets register FLAG</td>
+              </tr>
+              <tr>
+                <td>7</td>
+                <td>CMPX</td>
+                <td>immediate</td>
+                <td>b32</td>
+                <td>CMPX #100</td>
+                <td>compares value in register X, and sets register FLAG</td>
+              </tr>
+              <tr>
+                <td>8</td>
+                <td>CMPY</td>
+                <td>immediate</td>
+                <td>b32</td>
+                <td>CMPY #100</td>
+                <td>compares value in register Y, and sets register FLAG</td>
+              </tr>
+              <tr>
+                <td>9</td>
+                <td>CMPD</td>
+                <td>immediate</td>
+                <td>b32</td>
+                <td>CMPD #100</td>
+                <td>compares value in register D, and sets register FLAG</td>
+              </tr>
+              <tr>
+                <td>10</td>
+                <td>JMP</td>
+                <td>label</td>
+                <td>b32</td>
+                <td>JMP #Loop</td>
+                <td>jump to the address of the label</td>
+              </tr>
+              <tr>
+                <td>11</td>
+                <td>JEQ</td>
+                <td>label</td>
+                <td>b32</td>
+                <td>JEQ #Loop</td>
+                <td>jump to the address of the label only if the EQ is set on the register FLAG</td>
+              </tr>
+              <tr>
+                <td>12</td>
+                <td>JNE</td>
+                <td>label</td>
+                <td>b32</td>
+                <td>JNE #Loop</td>
+                <td>jump to the address of the label only if the NE is set on the register FLAG</td>
+              </tr>
+              <tr>
+                <td>13</td>
+                <td>JGT</td>
+                <td>label</td>
+                <td>b32</td>
+                <td>JGT #Loop</td>
+                <td>jump to the address of the label only if the GT is set on the register FLAG</td>
+              </tr>
+              <tr>
+                <td>14</td>
+                <td>JLT</td>
+                <td>label</td>
+                <td>b32</td>
+                <td>JLT #Loop</td>
+                <td>jump to the address of the label only if the LT is set on the register FLAG</td>
+              </tr>
+              <tr>
+                <td>15</td>
+                <td>INCA</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>add one to the value in register A</td>
+              </tr>
+              <tr>
+                <td>16</td>
+                <td>INCB</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>add one to the value in register B</td>
+              </tr>
+              <tr>
+                <td>17</td>
+                <td>INCX</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>add one to the value in register X</td>
+              </tr>
+              <tr>
+                <td>18</td>
+                <td>INCY</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>add one to the value in register Y</td>
+              </tr>
+              <tr>
+                <td>19</td>
+                <td>INCD</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>add one to the value in register D</td>
+              </tr>
+              <tr>
+                <td>20</td>
+                <td>DECA</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>subtract one from the value in register A</td>
+              </tr>
+              <tr>
+                <td>21</td>
+                <td>DECB</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>subtract one from the value in register B</td>
+              </tr>
+              <tr>
+                <td>22</td>
+                <td>DECX</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>subtract one from the value in register X</td>
+              </tr>
+              <tr>
+                <td>23</td>
+                <td>DECY</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>subtract one from the value in register Y</td>
+              </tr>
+              <tr>
+                <td>24</td>
+                <td>DECD</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>subtract one from the value in register D</td>
+              </tr>
+              <tr>
+                <td>25</td>
+                <td>ROLA</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>rotate the value in register A to the left</td>
+              </tr>
+              <tr>
+                <td>26</td>
+                <td>ROLB</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>rotate the value in register B to the left</td>
+              </tr>
+              <tr>
+                <td>27</td>
+                <td>RORA</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>rotate the value in register A to the right</td>
+              </tr>
+              <tr>
+                <td>28</td>
+                <td>RORB</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>rotate the value in register B to the right</td>
+              </tr>
+              <tr>
+                <td>29</td>
+                <td>ADCA</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>add one to the value of register A only if the CARRY is set on the register FLAG</td>
+              </tr>
+              <tr>
+                <td>30</td>
+                <td>ADCB</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>add one to the value of register B only if the CARRY is set on the register FLAG</td>
+              </tr>
+              <tr>
+                <td>31</td>
+                <td>ADDA</td>
+                <td>immediate</td>
+                <td>b32</td>
+                <td>ADDA #100</td>
+                <td>add the value to register A</td>
+              </tr>
+              <tr>
+                <td>32</td>
+                <td>ADDB</td>
+                <td>immediate</td>
+                <td>b32</td>
+                <td>ADDB #100</td>
+                <td>add the value to register B</td>
+              </tr>
+              <tr>
+                <td>33</td>
+                <td>ADDAB</td>
+                <td></td>
+                <td>b32</td>
+                <td></td>
+                <td>add the values of register A and register B, and then store the result into register D</td>
+              </tr>
+              <tr>
+                <td>34</td>
+                <td>LDB</td>
+                <td>immediate</td>
+                <td>starterVM</td>
+                <td>LDB #100</td>
+                <td>load value into register B</td>
+              </tr>
+              <tr>
+                <td>35</td>
+                <td>LDY</td>
+                <td>immediate</td>
+                <td>starterVM</td>
+                <td>LDY #100</td>
+                <td>load value into register Y</td>
+              </tr>
+              <tr>
+                <td>36</td>
+                <td>INT</td>
+                <td>immediate</td>
+                <td>starterVM</td>
+                <td>INT #1</td>
+                <td>trigger one interruption</td>
+              </tr>
+              <tr>
+                <td>37</td>
+                <td>STB, X</td>
+                <td></td>
+                <td>starterVM</td>
+                <td></td>
+                <td>store value in register B into memory location specified by register X</td>
+              </tr>
+              <tr>
+                <td>38</td>
+                <td>LDX</td>
+                <td>address</td>
+                <td>starterVM</td>
+                <td>LDX [#100]</td>
+                <td>load value stored at memory address into register X</td>
+              </tr>
+              <tr>
+                <td>39</td>
+                <td>STY, X</td>
+                <td></td>
+                <td>starterVM</td>
+                <td></td>
+                <td>store value in register Y into memory location specified by register X</td>
+              </tr>
+              <tr>
+                <td>40</td>
+                <td>LDY</td>
+                <td>address</td>
+                <td>starterVM</td>
+                <td>LDY [#100]</td>
+                <td>load value stored at memory address into register Y</td>
+              </tr>
+              <tr>
+                <td>41</td>
+                <td>LDA</td>
+                <td>address</td>
+                <td>starterVM</td>
+                <td>LDA [#100]</td>
+                <td>load value stored at memory address into register A</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <h2><a name="interrupts">Interrupts</a></h2>
+      <div class="row">
+        <div class="col-md-10">
+          <div class="panel panel-default">
+            <table class="table table-striped table-bordered table-hover">
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>input registers</th>
+                <th>output registers</th>
+                <th>Description</th>
+              </tr>
+              <tr>
+                <td>1</td>
+                <td>random</td>
+                <td>X, Y</td>
+                <td>D</td>
+                <td>generate a pseudo-random integer, and set it into D register.</td>
+              </tr>
+              <tr>
+                <td>2</td>
+                <td>sleep</td>
+                <td>X</td>
+                <td></td>
+                <td>sleep a while before executing next instruction</td>
+              </tr>
+              <tr>
+                <td>3</td>
+                <td>buff</td>
+                <td></td>
+                <td></td>
+                <td>add a value into input buffer</td>
+              </tr>
+              <tr>
+                <td>4</td>
+                <td>buff</td>
+                <td></td>
+                <td>B</td>
+                <td>get and remove a value from input buffer</td>
+              </tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+<!--       <h2>Memory</h2>
+      <div class="row">
+      </div>
+ -->      
+    </div> <!-- /container -->
+
+  </body>
+
+ </html>

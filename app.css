@@ -1,0 +1,15 @@
+.row {
+  margin-bottom: 10px;
+}
+.wordwrap { 
+  white-space: pre-wrap;      /* CSS3 */   
+  white-space: -moz-pre-wrap; /* Firefox */    
+  white-space: -pre-wrap;     /* Opera <7 */   
+  white-space: -o-pre-wrap;   /* Opera 7 */    
+  word-wrap: break-word;      /* IE */
+}
+
+hr {
+  margin-top: 40px;
+  margin-bottom: 40px;
+}
