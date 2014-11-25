@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+node ./r.js -convert ../../asm/ ../www/lib/asm
+node ./r.js -convert ../../kernel/ ../www/lib/kernel

@@ -1,0 +1,15 @@
+{
+  "name": "starterVM",
+  "version": "1.0.0",
+  "description": "A simple register based virtual machine running on web",
+  "main": "index.js",
+  "scripts": {
+    "test": "gulp test"
+  },
+  "author": "lujb",
+  "license": "MIT",
+  "devDependencies": {
+    "gulp": "^3.8.9",
+    "shelljs": "^0.3.0"
+  }
+}
