@@ -86,15 +86,24 @@ var binary = function() {var src = new String(function() {
 /*
 ; print binary code
 Start: 
+ ; where to print
  LDX #$A000 
+
+ ; a byte consists of eight bits
  LDY #8
+
+ ; 0
  LDA #48
+
  ;target
  LDB #$81
+
 Loop1: 
+ ; test one bit
  ROLB 
  ADCA 
  STA ,X 
+
  LDA #48 
  INCX 
  INCX 
@@ -160,18 +169,27 @@ END:
 }); return src.substr(17, src.length-22); }();
 var echo = function() {var src = new String(function() {
 /*
-; print what you type
+; print while you type.
+; make sure your screen is focused when running this program
 START:
   LDX :#0
   LDY #$A000
   STY, X
 
 LOOP: 
+  ; delay 30 milliseconds
   LDX #30
   INT #2
+
+  ; get one value from input buff
   INT #4
+
+  ; if failed to get
   CMPB #0
+  ; then try again
   JEQ #LOOP
+
+  ; else print it onto scrren
   LDX [:#0]
   STB, X
   LDY [:#0]
@@ -179,6 +197,8 @@ LOOP:
   INCY
   LDX :#0
   STY, X
+
+  ; loop
   JMP #LOOP
 
   END START

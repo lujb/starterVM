@@ -11,5 +11,21 @@
   "devDependencies": {
     "gulp": "^3.8.9",
     "shelljs": "^0.3.0"
-  }
+  },
+  "dependencies": {
+    "gulp": "^3.8.10",
+    "shelljs": "^0.3.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lujb/starterVM"
+  },
+  "keywords": [
+    "virtual",
+    "machine"
+  ],
+  "bugs": {
+    "url": "https://github.com/lujb/starterVM/issues"
+  },
+  "homepage": "https://github.com/lujb/starterVM"
 }
