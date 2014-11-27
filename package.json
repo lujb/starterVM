@@ -12,10 +12,6 @@
     "gulp": "^3.8.9",
     "shelljs": "^0.3.0"
   },
-  "dependencies": {
-    "gulp": "^3.8.10",
-    "shelljs": "^0.3.0"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/lujb/starterVM"
