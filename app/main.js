@@ -33,7 +33,7 @@ define(function (require) {
 var condition = function() {var src = new String(function() {
 /*
 ; print "HIJKL"
-Start: 
+START: 
  JMP #Spot1 
  LDA #65 
  LDX #$A000 
@@ -79,13 +79,13 @@ Spot6:
  LDX #$A00C 
  STA ,X 
 EndSpot: 
- END Start 
+ END START
 */
-}); return src.substr(17, src.length-22); }();
+}); return src.substr(16, src.length-21); }();
 var binary = function() {var src = new String(function() {
 /*
 ; print binary code
-Start: 
+START: 
  ; where to print
  LDX #$A000 
 
@@ -110,9 +110,9 @@ Loop1:
  DECY 
  CMPY #$00 
  JNE #Loop1 
- END Start 
+ END START
 */
-}); return src.substr(17, src.length-22); }();
+}); return src.substr(16, src.length-21); }();
 var random = function() {var src = new String(function() {
 /*
 ; char *addr, *count; 
@@ -166,7 +166,7 @@ LOOP:
 END:
   END START
 */
-}); return src.substr(17, src.length-22); }();
+}); return src.substr(16, src.length-21); }();
 var echo = function() {var src = new String(function() {
 /*
 ; print while you type.
@@ -203,7 +203,7 @@ LOOP:
 
   END START
 */
-}); return src.substr(17, src.length-22); }();
+}); return src.substr(16, src.length-21); }();
 
 
 
